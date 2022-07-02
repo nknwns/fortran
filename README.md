@@ -249,3 +249,111 @@ program hehe
         end subroutine getPositionMax
 end program hehe
 ```
+---
+
+## Задача #3
+
+#### _Задание:_
+Дана матрица А, если среднее арифметическое чётных элементов больше нуля, то сформировать одномерный массив С из элементов А, которые больше этого среднего арифметического.
+
+---
+#### _Логика:_
+Пройтись по всей матрице для подсчета суммы. Поделить сумму на количество элементо в матрице. Если оно больше нуля, то пройтись по матрице еще раз и сравнить каждый элемент с полученным числом. Создать и вывести новый массив.
+
+Алгоритм для поиска среднего арифметического четных элементов:
+```fortran
+integer :: c = 0
+do i = 1, row
+  do j = 1, col
+    if (mod(matrix(i, j), 2) == 0) then
+      s = s + matrix(i, j)
+      c = c + 1
+    end if
+  end do
+end do
+r = s / c
+```
+
+
+---
+#### _Решение:_
+```fortran
+program hehe
+    integer, parameter :: nmax = 100
+    integer :: infile = 3, outfile = 15
+    integer row, col, A(nmax, nmax), array(nmax * nmax)
+    real r ! Среднее арифметические
+    integer :: n = 1 ! Количество элементов в новом массиве
+
+    open(infile, file = 'inA.txt')
+    open(outfile, file = 'out.txt')
+    
+    call inMatrix(infile, A, row, col)
+    
+    call getArithmeticMean(A, row, col, r)
+    if (r > 0) then
+        call createArray(A, row, col, array, r, n)
+        if (n == 1) then
+            write(outfile, *) "Таких чисел нет"
+        else 
+            call outArray(outfile, array, n - 1)
+        end if
+    else
+        write(outfile, *) "Среднее арифметическое четных чисел меньше нуля"
+    end if
+    
+    close(infile)
+    close(outfile)
+    
+    contains
+        subroutine inMatrix(file, matrix, row, col)
+            integer file, row, col, i, j
+            integer matrix(nmax,nmax)
+            read(file, *) row
+            read(file, *) col
+            read(file, *) ((matrix(i,j), j = 1, col), i = 1, row)
+        end subroutine inMatrix
+
+        subroutine outArray(file, array, col)
+            integer file, col, i, j
+            integer array(nmax)
+            character(20) col_str
+            write(col_str, *) col
+            write(file, *) (array(j), j = 1, col)
+        end subroutine outArray
+        
+        subroutine createArray(matrix, row, col, array, value, n)
+            integer row, col, i, j, n
+            real value
+            integer matrix(nmax, nmax), array(nmax * nmax)
+            
+            do i = 1, row
+                do j = 1, col
+                    if (matrix(i, j) > value) then
+                        array(n) = matrix(i, j)
+                        n = n + 1
+                    end if
+                end do
+            end do
+                    
+        end subroutine createArray
+        
+        subroutine getArithmeticMean(matrix, row, col, r)
+            integer row, col, i, j
+            real r
+            integer matrix(nmax, nmax)
+            real :: s = 0 ! Сумма элементов
+            integer :: c = 0 ! Количество элементов
+            
+            do i = 1, row
+                do j = 1, col
+                    if (mod(matrix(i, j), 2) == 0) then
+                        s = s + matrix(i, j)
+                        c = c + 1
+                    end if
+                end do
+            end do
+            r = s / c
+        end subroutine getArithmeticMean
+end program hehe
+```
