@@ -76,22 +76,22 @@ end do
 #### _Решение:_
 ```fortran
 program heh
-    integer, parameter :: nmax = 100
-    integer :: infile = 1, outfile = 2
-    integer n, i
-    integer A(nmax, nmax)
-    integer s, maxvalue
+    integer, parameter :: nmax = 100 ! Константа для обозначения максимального размера матрицы
+    integer :: infile = 1, outfile = 2 ! Входной и выходной файлы
+    integer n ! Размер матрицы
+    integer A(nmax, nmax) ! Матрица
+    integer s, maxvalue ! Сумма и максимальное значение
     
-    open(infile, file = 'in.txt')
-    open(outfile, file = 'out.txt')
+    open(infile, file = 'in.txt') ! Открываем входной файл
+    open(outfile, file = 'out.txt') ! Открываем выходной файл
     
-    call inMatrix(infile, A, n, n)
+    call inMatrix(infile, A, n, n) ! Вызываем подпрограмму для ввода данных из файла в матрицу. Принимает файл, матрицу, размеры
     
-    call getSum(A, n, n, s)
-    if (s > 0) then ! сравнение суммы с нулем
-        call getMax(A, n, n, maxvalue)
-        if (maxvalue /= -10000) then
-            write(outfile, *) maxvalue
+    call getSum(A, n, n, s) ! Вызываем подпрограмму для поиска суммы. Принимает матрицу, размеры, сумму
+    if (s > 0) then ! Сравниваем сумму с нулем
+        call getMax(A, n, n, maxvalue) ! Вызываем подпрограмму для поиска максимального
+        if (maxvalue /= -10000) then ! Сравниваем его с установленным
+            write(outfile, *) maxvalue ! Записать в файл максимальное значение
         else
             write(outfile, *) "Такого элемента в матрице нет"
         end if
@@ -99,39 +99,153 @@ program heh
         write(outfile, *) "Сумма элементов под диагональю отрицательная" 
     end if
     
-    close(infile)
-    close(outfile)
+    close(infile) ! Закрываем входной файл
+    close(outfile) ! Закрываем выходной файл
     contains
-        subroutine inMatrix(file, matrix, row, col)
-            integer file, row, col, i, j
+        subroutine inMatrix(file, matrix, row, col) ! Подпрограмма для ввода матрицы (файл, матрица, размеры)
+            integer file, row, col, i, j ! Объявление переменных
             integer matrix(nmax, nmax)
-            read(file, *) row
-            read(file, *) col
-            read(file, *) ((matrix(i,j), j = 1, col), i = 1, row)
+            read(file, *) row ! Чтение первого числа из файла
+            read(file, *) col ! Чтение второгой числа из файла
+            read(file, *) ((matrix(i,j), j = 1, col), i = 1, row) ! Чтение всех остальних чисел и запись их в матрицу
         end subroutine inMatrix
 
-        subroutine getSum(matrix, row, col, s)
-            integer row, col, i, j
+        subroutine getSum(matrix, row, col, s) ! Подпрограмма для поиска суммы (матрица, размеры, сумма)
+            integer row, col, i, j ! Объявление переменных
             integer matrix(nmax, nmax), s
-            s = 0
-            do i = 2, row
-                do j = 1, i - 1 ! цикл For от 1 до i - 1
-                    s = s + matrix(i, j)
+            s = 0 ! Изначально сумма равна нулю
+            do i = 2, row ! Цикл For
+                do j = 1, i - 1 ! Цикл For
+                    s = s + matrix(i, j) ! Прибавляем к сумме
                 end do
             end do
         end subroutine getSum
         
-        subroutine getMax(matrix, row, col, m)
-            integer row, col, i, j
+        subroutine getMax(matrix, row, col, m) ! Подпрограмма для поиска максимума (матрица, размеры, максимум)
+            integer row, col, i, j ! Объявление переменных
             integer matrix(nmax,nmax), m
-            m = -10000
-            do i = 1, row - 1
-                do j = i + 1, col
-                    if (matrix(i, j) > m .and. mod(matrix(i, j), 2) == 0) then
+            m = -10000 ! Изначально число должно быть очень маленьким
+            do i = 1, row - 1 ! Цикл For
+                do j = i + 1, col ! Цикл For
+                    if (matrix(i, j) > m .and. mod(matrix(i, j), 2) == 0) then ! Сравнение с нулем и четностью. mod принимает число для сравнения и на что делить.
                         m = matrix(i, j)
                     end if
                 end do
             end do
         end subroutine getMax
 end program heh
+```
+---
+
+## Задача #2
+
+#### _Задание:_
+Дана квадратная матрица. Если максимальный отрицательный элемент находится ниже главной диагонали, то составить массив из минимальных элементов строк. 
+
+---
+#### _Логика:_
+Пройтись под дигональю для поиска минимального элемента. После этого пройтись над диагональю для поиска более меньшего. Если он не найден, то составить массив из минимальных элеметов строк. Для этого просто пройтись по строкам в поисках минимума. Информацию о том, находится ли миксимальный отрицательный элемент ниже диагонали, будем хранить в логической переменной.
+
+**Теория по диагоналям и прохождениям представлена в Задаче #1.**
+
+Изначально минимальным элементов в строке будет первый. Для поиска минимума в строке будем использовать следующий алгоритм:
+```fortran
+do i = 1, n
+  m = matrix(i, j)
+  do j = 1, n
+    if (matrix(i, j) < m) then
+      m = matrix(i, j)
+    end if
+  end do
+  ! Обработка нашего минимума
+end do
+
+```
+
+
+---
+#### _Решение:_
+```fortran
+program hehe
+    integer, parameter :: nmax = 100
+    integer :: infile = 1, outfile = 2
+    integer row, col, i
+    real A(nmax, nmax), array(nmax)
+    logical :: isDown = .true. ! Тут будем хранить находится ли нужное число ниже диагонали
+
+    open(infile, file = 'in.txt')
+    open(outfile, file = 'out.txt')
+    
+    call inMatrix(infile, A, row, col)
+    
+    call getPositionMax(A, row, col, isDown)
+    if (isDown) then
+        call createArrayMin(A, row, col, array) ! Если ниже, то создаем массив и выводим его в файл
+        call outArray(outfile, array, row)
+    end if
+    
+    close(infile)
+    close(outfile)
+    
+    contains
+        subroutine inMatrix(file, matrix, row, col)
+            integer file
+            integer row, col
+            real matrix(nmax,nmax)
+            integer i, j
+            read(file, *) row
+            read(file, *) col
+            read(file, *) ((matrix(i,j), j = 1, col), i = 1, row)
+        end subroutine inMatrix
+
+        subroutine outArray(file, array, col) ! Подпрограмма для вывода массива в файл
+            integer file, col
+            real array(nmax)
+            integer i, j
+            character(20) col_str
+            write(col_str, *) col
+            write(file, '(' // col_str // '(1X,F6.2))') (array(j), j = 1, col)
+        end subroutine outArray
+        
+        subroutine createArrayMin(matrix, row, col, array)
+            integer row, col, i, j
+            real matrix(nmax,nmax), array(nmax)
+            real minvalue
+            
+            do i = 1, row
+                minvalue = matrix(i, 1)
+                do j = 2, col
+                    if (matrix(i, j) < minvalue) then
+                        minvalue = matrix(i, j)
+                    end if
+                end do
+                array(i) = minvalue
+            end do
+                    
+        end subroutine createArrayMin
+        
+        subroutine getPositionMax(matrix, row, col, isDown)
+            integer row, col, i, j
+            real matrix(nmax,nmax)
+            logical isDown
+            real maxvalue
+            maxvalue = -10000000
+            
+            do i = 2, row
+                do j = 1, i - 1
+                    if (matrix(i, j) < 0 .and. matrix(i, j) > maxvalue) then
+                        maxvalue = matrix(i, j)
+                    end if
+                end do
+            end do
+            
+            do i = 1, row - 1
+                do j = i + 1, col
+                    if (matrix(i, j) < 0 .and. matrix(i, j) > maxvalue) then
+                        isDown = .false.
+                    end if
+                end do
+            end do
+        end subroutine getPositionMax
+end program hehe
 ```
