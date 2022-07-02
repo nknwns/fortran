@@ -357,3 +357,101 @@ program hehe
         end subroutine getArithmeticMean
 end program hehe
 ```
+---
+
+## Задача #4
+
+#### _Задание:_
+Дана двумерная матрица. Найти первый столбец, в котором есть хотя бы один чётный элемент, и найти сумму столбцов после этого столбца.
+
+---
+#### _Логика:_
+Пройтись по всей матрице для поиска четного. Как только нашли, запомнить номер столбцы. Пройтись уже от следующего столбца для когда для поиска суммы. Вывести ее
+
+Алгоритм для поиска столбца с четным элементов будет следующим:
+```fortran
+integer :: pos = 0
+do j = 1, col
+    do i = 1, row
+        if (mod(matrix(i, j), 2) == 0) then
+            pos = j
+            exit ! С помощью этого можно прервать цикл и выйти из него
+        end if
+    end do
+    if (pos /= 0) then
+        exit
+    end if
+end do
+```
+---
+#### _Решение:_
+```fortran
+program hehe
+    integer, parameter :: nmax = 100
+    integer :: infile = 3, outfile = 15
+    integer row, col, A(nmax, nmax)
+    integer :: s = 0, pos = 0
+
+    open(infile, file = 'inA.txt')
+    open(outfile, file = 'out.txt')
+    
+    call inMatrix(infile, A, row, col)
+    
+    call getColumn(A, row, col, pos)
+    if (pos > 0 .and. pos < col) then
+        call getSum(A, row, col, pos + 1, s)
+        write(outfile, *) s
+    else
+        write(outfile, *) "Такого столбца не существует"
+    end if
+    
+    close(infile)
+    close(outfile)
+    
+    contains
+        subroutine inMatrix(file, matrix, row, col)
+            integer file, row, col, i, j
+            integer matrix(nmax,nmax)
+            read(file, *) row
+            read(file, *) col
+            read(file, *) ((matrix(i,j), j = 1, col), i = 1, row)
+        end subroutine inMatrix
+
+        subroutine outArray(file, array, col)
+            integer file, col, i, j
+            integer array(nmax)
+            character(20) col_str
+            write(col_str, *) col
+            write(file, *) (array(j), j = 1, col)
+        end subroutine outArray
+        
+        subroutine getSum(matrix, row, col, pos, s)
+            integer row, col, i, j, pos, s
+            integer matrix(nmax, nmax)
+            
+            do i = 1, row
+                do j = pos, col
+                    s = s + matrix(i, j)
+                end do
+            end do
+                    
+        end subroutine getSum
+        
+        subroutine getColumn(matrix, row, col, pos)
+            integer row, col, i, j, pos
+            integer matrix(nmax, nmax)
+            
+            do j = 1, col
+                do i = 1, row
+                    if (mod(matrix(i, j), 2) == 0) then
+                        pos = j
+                        exit
+                    end if
+                end do
+                if (pos /= 0) then
+                    exit
+                end if
+            end do
+        end subroutine getColumn
+end program hehe
+```
